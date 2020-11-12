@@ -1,0 +1,2 @@
+# use custom tool for diffing ipynb notebooks
+*.ipynb diff=ipynb

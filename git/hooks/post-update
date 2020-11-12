@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# For every ipynb file in the git index:
+# - apply black and flake8
+# - export the notebook to a Python script in folder 'python'
+# - and add it to the git index
+
+if git diff --cached --name-status | \
+              awk '$1 != "D" { print $2 }' | \
+              grep '.*\.ipynb$'; then
+
+  for nb in $(git diff --cached --name-status | \
+                awk '$1 != "D" { print $2 }' | \
+                grep '.*\.ipynb$'); do
+    (
+      nb_dir="$(dirname -- "$nb")"
+      nb_file="$(basename -- "$nb")"
+      nb_base="${nb_file%.*}"
+
+      (>&2 echo -n '[NbConvertApp]' )
+      (>&2 echo "Syncing $nb to ${nb_dir}/${nb_base}.py ..." )
+
+      cd "$nb_dir" || exit 1
+      jupytext --sync --from jupytext//py --sync --pre-commit
+    )
+  done
+fi
+
+exit 0
